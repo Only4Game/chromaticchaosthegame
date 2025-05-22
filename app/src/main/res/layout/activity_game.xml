@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".GameActivity">
 
-    <com.example.chromatycznychaos.GameView
+    <com.example.chromatic_chaos_thegame.GameView
         android:id="@+id/gameView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -17,6 +17,7 @@
 
     <LinearLayout
         android:id="@+id/buttonPanel"
+        style="?android:attr/buttonBarStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -28,43 +29,51 @@
 
         <Button
             android:id="@+id/buttonRed"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:text="R" />
+            android:text="R"
+            tools:ignore="VisualLintButtonSize" />
 
         <Button
             android:id="@+id/buttonGreen"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:text="G" />
+            android:text="G"
+            tools:ignore="VisualLintButtonSize" />
 
         <Button
             android:id="@+id/buttonBlue"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:text="B" />
+            android:text="B"
+            tools:ignore="VisualLintButtonSize" />
 
         <Button
             android:id="@+id/buttonYellow"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:textColor="@android:color/black"
             android:textStyle="bold"
-            android:text="Y" />
+            android:text="Y"
+            tools:ignore="VisualLintButtonSize" />
 
     </LinearLayout>
 

@@ -22,20 +22,16 @@ public class GameActivity extends AppCompatActivity implements com.example.chrom
         gameView = findViewById(R.id.gameView);
         gameView.setGameManager(this);
 
-        Button buttonRed = findViewById(R.id.buttonRed);
-        Button buttonGreen = findViewById(R.id.buttonGreen);
-        Button buttonBlue = findViewById(R.id.buttonBlue);
-        Button buttonYellow = findViewById(R.id.buttonYellow);
+//        Button buttonRed = findViewById(R.id.buttonRed);
+//        Button buttonGreen = findViewById(R.id.buttonGreen);
+//        Button buttonBlue = findViewById(R.id.buttonBlue);
+//        Button buttonYellow = findViewById(R.id.buttonYellow);
+//
+//        buttonRed.setBackgroundColor(Color.RED);
+//        buttonGreen.setBackgroundColor(Color.GREEN);
+//        buttonBlue.setBackgroundColor(Color.BLUE);
+//        buttonYellow.setBackgroundColor(Color.YELLOW);
 
-        buttonRed.setBackgroundColor(Color.RED);
-        buttonGreen.setBackgroundColor(Color.GREEN);
-        buttonBlue.setBackgroundColor(Color.BLUE);
-        buttonYellow.setBackgroundColor(Color.YELLOW);
-
-        buttonRed.setOnClickListener(v -> gameView.changePlatformColor(buttonColors[0]));
-        buttonGreen.setOnClickListener(v -> gameView.changePlatformColor(buttonColors[1]));
-        buttonBlue.setOnClickListener(v -> gameView.changePlatformColor(buttonColors[2]));
-        buttonYellow.setOnClickListener(v -> gameView.changePlatformColor(buttonColors[3]));
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();

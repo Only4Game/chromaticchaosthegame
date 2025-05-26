@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import android.view.MotionEvent;
 
 public class GameView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
 
@@ -26,6 +27,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private int screenHeight;
 
     private Rect platform;
+
+    private float platformX; // aktualna pozycja X środka platformy
+
     private int platformWidth = 200;
     private int platformHeight = 50;
     private int platformColor = Color.RED;
@@ -76,8 +80,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         screenHeight = getHeight();
 
         int platformY = screenHeight - platformHeight - 100;
-        int platformX = (screenWidth - platformWidth) / 2;
-        platform = new Rect(platformX, platformY, platformX + platformWidth, platformY + platformHeight);
+        platformX = screenWidth / 2f;
+        platform = new Rect((int)(platformX - platformWidth / 2), platformY, (int)(platformX + platformWidth / 2), platformY + platformHeight);
+
 
         startGame();
     }
@@ -87,8 +92,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         screenWidth = width;
         screenHeight = height;
         int platformY = screenHeight - platformHeight - 100;
-        int platformX = (screenWidth - platformWidth) / 2;
-        platform.set(platformX, platformY, platformX + platformWidth, platformY + platformHeight);
+        platformX = screenWidth / 2f;
+        platform = new Rect((int)(platformX - platformWidth / 2), platformY, (int)(platformX + platformWidth / 2), platformY + platformHeight);
+
     }
 
     @Override
@@ -156,7 +162,22 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_MOVE:
+                platformX = event.getX();
+                break;
+        }
+        return true;
+    }
+
     private void update() {
+        int platformY = screenHeight - platformHeight - 100;
+        platform.set((int)(platformX - platformWidth / 2), platformY, (int)(platformX + platformWidth / 2), platformY + platformHeight);
+
+
         long currentTime = System.currentTimeMillis();
 
         if (currentTime - lastSpeedIncreaseTime > speedIncreaseInterval) {
@@ -277,24 +298,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         paint.setTextAlign(Paint.Align.RIGHT);
         canvas.drawText("Time: " + elapsedTime + "s", screenWidth - 50, 100, paint);
     }
-
-    public void changePlatformColor(int color) {
-        if (isPlaying) {
-            platformColor = color;
-        }
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            // Example: Cycle color on tap - remove if using buttons
-            // currentColorIndex = (currentColorIndex + 1) % availableColors.length;
-            // platformColor = availableColors[currentColorIndex];
-            return true;
-        }
-        return super.onTouchEvent(event);
-    }
-
     private void gameOver() {
         isPlaying = false;
         handler.post(() -> {

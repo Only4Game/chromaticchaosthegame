@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:background="#1E1E2F" android:padding="16dp"
     tools:context=".MenuActivity">
 
     <TextView
@@ -14,6 +14,10 @@
         android:text="Chromatyczny Chaos"
         android:textSize="34sp"
         android:textStyle="bold"
+        android:textColor="#FFFFFF" android:shadowColor="#000000"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="3"
         app:layout_constraintBottom_toTopOf="@+id/playButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,7 +31,8 @@
         android:layout_marginTop="64dp"
         android:text="Graj"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/leaderboardsButton"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/button_background" app:layout_constraintBottom_toTopOf="@+id/leaderboardsButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gameTitle" />
@@ -39,7 +44,8 @@
         android:layout_marginTop="16dp"
         android:text="Tabela Wyników"
         android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/button_background" app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/playButton" />

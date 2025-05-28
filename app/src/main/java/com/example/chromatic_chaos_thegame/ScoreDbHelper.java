@@ -7,12 +7,12 @@ import android.provider.BaseColumns;
 
 public class ScoreDbHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2; // <-- ZWIĘKSZ WERSJĘ DO 2
     public static final String DATABASE_NAME = "ChromatycznyChaos.db";
 
     public static class ScoreEntry implements BaseColumns {
         public static final String TABLE_NAME = "scores";
-        // public static final String COLUMN_NAME_PLAYER = "player_name"; // Można dodać imię gracza
+        public static final String COLUMN_NAME_PLAYER = "player_name"; // <-- NOWA KOLUMNA
         public static final String COLUMN_NAME_SCORE = "score";
         public static final String COLUMN_NAME_TIMESTAMP = "timestamp";
     }
@@ -20,6 +20,7 @@ public class ScoreDbHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + ScoreEntry.TABLE_NAME + " (" +
                     ScoreEntry._ID + " INTEGER PRIMARY KEY," +
+                    ScoreEntry.COLUMN_NAME_PLAYER + " TEXT," + // <-- DODAJ TYP KOLUMNY
                     ScoreEntry.COLUMN_NAME_SCORE + " INTEGER," +
                     ScoreEntry.COLUMN_NAME_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP)";
 
@@ -37,7 +38,7 @@ public class ScoreDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Na razie prosta implementacja - usuwa starą tabelę i tworzy nową
+        // Usuwa starą tabelę i tworzy nową przy aktualizacji
         db.execSQL(SQL_DELETE_ENTRIES);
         onCreate(db);
     }

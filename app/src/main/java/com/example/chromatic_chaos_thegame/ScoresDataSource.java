@@ -14,6 +14,7 @@ public class ScoresDataSource {
     private ScoreDbHelper dbHelper;
     private String[] allColumns = {
             ScoreDbHelper.ScoreEntry._ID,
+            ScoreDbHelper.ScoreEntry.COLUMN_NAME_PLAYER, // <-- DODANA KOLUMNA
             ScoreDbHelper.ScoreEntry.COLUMN_NAME_SCORE,
             ScoreDbHelper.ScoreEntry.COLUMN_NAME_TIMESTAMP
     };
@@ -30,16 +31,18 @@ public class ScoresDataSource {
         dbHelper.close();
     }
 
-    public void addScore(long score) {
+    // ZMODYFIKOWANA METODA DODAWANIA WYNIKU
+    public void addScore(String name, long score) {
         ContentValues values = new ContentValues();
+        values.put(ScoreDbHelper.ScoreEntry.COLUMN_NAME_PLAYER, name);
         values.put(ScoreDbHelper.ScoreEntry.COLUMN_NAME_SCORE, score);
 
         database.insert(ScoreDbHelper.ScoreEntry.TABLE_NAME, null, values);
     }
 
-    // Pobiera top 10 wyników
-    public List<Long> getTopScores(int limit) {
-        List<Long> scores = new ArrayList<>();
+    // ZMODYFIKOWANA METODA POBIERANIA WYNIKÓW
+    public List<ScoreData> getTopScores(int limit) {
+        List<ScoreData> scores = new ArrayList<>();
 
         Cursor cursor = database.query(
                 ScoreDbHelper.ScoreEntry.TABLE_NAME,
@@ -48,17 +51,23 @@ public class ScoresDataSource {
                 null,
                 null,
                 null,
-                ScoreDbHelper.ScoreEntry.COLUMN_NAME_SCORE + " DESC", // Sortuj malejąco
-                String.valueOf(limit) // Limit wyników
+                ScoreDbHelper.ScoreEntry.COLUMN_NAME_SCORE + " DESC",
+                String.valueOf(limit)
         );
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
+            String name = cursor.getString(cursor.getColumnIndexOrThrow(ScoreDbHelper.ScoreEntry.COLUMN_NAME_PLAYER));
             long score = cursor.getLong(cursor.getColumnIndexOrThrow(ScoreDbHelper.ScoreEntry.COLUMN_NAME_SCORE));
-            scores.add(score);
+            scores.add(new ScoreData(name, score)); // <-- UŻYWAMY ScoreData
             cursor.moveToNext();
         }
         cursor.close();
         return scores;
+    }
+
+    // NOWA METODA DO USUWANIA WYNIKÓW
+    public void deleteAllScores() {
+        database.delete(ScoreDbHelper.ScoreEntry.TABLE_NAME, null, null);
     }
 }

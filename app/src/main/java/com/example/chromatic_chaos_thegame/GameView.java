@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import android.view.MotionEvent;
 
 public class GameView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
 
@@ -27,14 +26,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private int screenHeight;
 
     private Rect platform;
-
-    private float platformX; // aktualna pozycja X środka platformy
-
     private int platformWidth = 200;
     private int platformHeight = 50;
     private int platformColor = Color.RED;
     private final int[] availableColors = {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW};
-    private int currentColorIndex = 0;
 
     private List<FallingObject> fallingObjects;
     private Random random;
@@ -49,6 +44,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     private long lastSpeedIncreaseTime;
 
     private GameManager gameManager;
+    private boolean isPlatformDragging = false;
+    private float dragOffsetX = 0;
 
     public interface GameManager {
         void onGameOver(long finalScore);
@@ -79,10 +76,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         screenWidth = getWidth();
         screenHeight = getHeight();
 
-        int platformY = screenHeight - platformHeight - 100;
-        platformX = screenWidth / 2f;
-        platform = new Rect((int)(platformX - platformWidth / 2), platformY, (int)(platformX + platformWidth / 2), platformY + platformHeight);
-
+        int platformY = screenHeight - platformHeight - 150;
+        int platformX = (screenWidth - platformWidth) / 2;
+        platform = new Rect(platformX, platformY, platformX + platformWidth, platformY + platformHeight);
 
         startGame();
     }
@@ -91,10 +87,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
         screenWidth = width;
         screenHeight = height;
-        int platformY = screenHeight - platformHeight - 100;
-        platformX = screenWidth / 2f;
-        platform = new Rect((int)(platformX - platformWidth / 2), platformY, (int)(platformX + platformWidth / 2), platformY + platformHeight);
-
+        int platformY = screenHeight - platformHeight - 150;
+        int currentPlatformLeft = platform.left;
+        platform.set(currentPlatformLeft, platformY, currentPlatformLeft + platformWidth, platformY + platformHeight);
+        if (platform.right > screenWidth) {
+            platform.right = screenWidth;
+            platform.left = screenWidth - platformWidth;
+        }
+        if (platform.left < 0) {
+            platform.left = 0;
+            platform.right = platformWidth;
+        }
     }
 
     @Override
@@ -116,6 +119,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             lastSpeedIncreaseTime = gameStartTime;
             lastObjectSpawnTime = gameStartTime;
             fallingObjects.clear();
+            int platformX = (screenWidth - platformWidth) / 2;
+            platform.offsetTo(platformX, platform.top);
         }
     }
 
@@ -162,22 +167,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE:
-                platformX = event.getX();
-                break;
-        }
-        return true;
-    }
-
     private void update() {
-        int platformY = screenHeight - platformHeight - 100;
-        platform.set((int)(platformX - platformWidth / 2), platformY, (int)(platformX + platformWidth / 2), platformY + platformHeight);
-
-
         long currentTime = System.currentTimeMillis();
 
         if (currentTime - lastSpeedIncreaseTime > speedIncreaseInterval) {
@@ -198,37 +188,54 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
 
                 if (Rect.intersects(obj.getRect(), platform)) {
                     handleCollision(obj);
-                    objectsToRemove.add(obj);
+                    objectsToRemove.add(obj); // Zawsze usuwamy obiekt po kolizji
                 }
                 else if (obj.getRect().top > screenHeight) {
-                    if(obj.getType() == FallingObject.ObjectType.NORMAL){
-                        // Missed normal object - optional penalty
+                    // Sprawdź, czy pominięty obiekt jest NORMALNY
+                    if (obj.getType() == FallingObject.ObjectType.NORMAL) {
+                        // Jeśli pominięto normalny obiekt, zakończ grę
+                        // (Można to zmienić na utratę życia, jeśli chcesz)
+                        // gameOver(); // ODZNACZ, JEŚLI CHCESZ, ABY POMINIĘCIE KOŃCZYŁO GRĘ
                     }
-                    objectsToRemove.add(obj);
+                    objectsToRemove.add(obj); // Usuwamy obiekty, które spadły poza ekran
                 }
             }
             fallingObjects.removeAll(objectsToRemove);
         }
     }
 
+    // ZMODYFIKOWANA METODA handleCollision
     private void handleCollision(FallingObject obj) {
-        if (obj.getType() == FallingObject.ObjectType.BOMB) {
-            gameOver();
-            return;
-        }
+        FallingObject.ObjectType type = obj.getType();
 
-        if (obj.getColor() == platformColor) {
-            if (obj.getType() == FallingObject.ObjectType.BONUS_POINTS) {
+        switch (type) {
+            case BOMB:
+                // Bomba zawsze kończy grę, niezależnie od koloru
+                gameOver();
+                break;
+
+            case BONUS_POINTS:
+                // Bonus punktowy zawsze dodaje punkty i nie kończy gry
                 if (gameManager != null) gameManager.addScore(2);
                 else score += 2;
-            } else if (obj.getType() == FallingObject.ObjectType.BONUS_SLOW) {
+                break;
+
+            case BONUS_SLOW:
+                // Bonus spowolnienia zawsze spowalnia i nie kończy gry
                 applySlowdown();
-            } else {
-                if (gameManager != null) gameManager.addScore(1);
-                else score++;
-            }
-        } else {
-            gameOver();
+                break;
+
+            case NORMAL:
+                // Normalny obiekt sprawdza kolor
+                if (obj.getColor() == platformColor) {
+                    // Dobry kolor - dodaj punkt
+                    if (gameManager != null) gameManager.addScore(1);
+                    else score++;
+                } else {
+                    // Zły kolor - koniec gry
+                    gameOver();
+                }
+                break;
         }
     }
 
@@ -298,7 +305,67 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         paint.setTextAlign(Paint.Align.RIGHT);
         canvas.drawText("Time: " + elapsedTime + "s", screenWidth - 50, 100, paint);
     }
+
+    public void changePlatformColor(int color) {
+        if (isPlaying) {
+            platformColor = color;
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (!isPlaying) {
+            return super.onTouchEvent(event);
+        }
+
+        int action = event.getActionMasked();
+        float touchX = event.getX();
+        float touchY = event.getY();
+
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                if (platform.contains((int) touchX, (int) touchY)) {
+                    isPlatformDragging = true;
+                    dragOffsetX = touchX - platform.left;
+                    return true;
+                }
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (isPlatformDragging) {
+                    float newLeft = touchX - dragOffsetX;
+                    float newRight = newLeft + platformWidth;
+
+                    if (newLeft < 0) {
+                        newLeft = 0;
+                        newRight = platformWidth;
+                    }
+                    if (newRight > screenWidth) {
+                        newRight = screenWidth;
+                        newLeft = screenWidth - platformWidth;
+                    }
+
+                    platform.left = (int) newLeft;
+                    platform.right = (int) newRight;
+
+                    return true;
+                }
+                break;
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                if (isPlatformDragging) {
+                    isPlatformDragging = false;
+                    return true;
+                }
+                break;
+        }
+        return super.onTouchEvent(event);
+    }
+
     private void gameOver() {
+        if (!isPlaying) return; // Zapobiegaj wielokrotnemu wywołaniu gameOver
+
         isPlaying = false;
         handler.post(() -> {
             if (gameManager != null) {
@@ -307,10 +374,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         });
     }
 
-    public void resume() {
-        // Called via Activity/Fragment onResume
-        // If needed, restart the game logic or thread here
-    }
+    public void resume() { }
 
     public void pause() {
         stopGame();

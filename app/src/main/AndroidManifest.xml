@@ -15,19 +15,28 @@
         <activity
             android:name=".MenuActivity"
             android:exported="true"
+
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".GameActivity"
+
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:exported="false" />
         <activity
             android:name=".GameOverActivity"
+
             android:exported="false" />
+
+        <activity
+            android:name=".LeaderboardsActivity"
+
+            android:exported="false" />
+
     </application>
 
 </manifest>
